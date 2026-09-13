@@ -76,3 +76,4 @@ os testes da API foram feitos no Bruno, a collection usada nos testes está na p
 bruno/
 
 ## Link do vídeo 
+https://drive.google.com/file/d/1BAquIQVjLhmBHCULz0n4qXvwedOuBVIh/view?usp=sharing
