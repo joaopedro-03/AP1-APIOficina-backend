@@ -1,0 +1,26 @@
+info:
+  name: "cadastro "
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/ordens"
+  body:
+    type: json
+    data: |-
+      {
+        "cliente": "Maria Victoria",
+        "veiculo": "Fiat Strada",
+        "servico": "Troca de bateria",
+        "valor": 450.00,
+        "concluida": false
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

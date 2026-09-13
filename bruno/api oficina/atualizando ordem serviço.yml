@@ -1,0 +1,26 @@
+info:
+  name: atualizando ordem serviço
+  type: http
+  seq: 6
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/ordens/3"
+  body:
+    type: json
+    data: |-
+      {
+        "cliente": "Maria Souza",
+        "veiculo": "Fiat Uno",
+        "servico": "Troca de correia dentada e limpeza do filtro de ar",
+        "valor": 700.00,
+        "concluida": true
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
