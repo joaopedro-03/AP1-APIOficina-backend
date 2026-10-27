@@ -1,22 +1,45 @@
+
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<ApiDbContext>(options =>
+    options.UseSqlite(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
+
 var app = builder.Build();
 
-var ordens = new List<OrdemServico>
-{
-    new OrdemServico(1, "João Pedro", "Corsa Classic", "Troca de óleo", 150.00, false),
-    new OrdemServico(2, "Carlos Silva", "Gol 2018", "Troca de pastilhas de freio", 350.00, true)
-};
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
-app.MapGet("/", () => "API da Oficina está no ar!");
+app.MapGet("/api", () => "API da Oficina está no ar!");
 
-app.MapGet("/api/ordens", () =>
+app.MapPost("/api/ordens", async (OrdemServicoEntradaDTO dados, ApiDbContext db) =>
 {
+    var oficina = new OficinaEntity
+    {
+        cliente = dados.cliente,
+        veiculo = dados.veiculo,
+        servico = dados.servico,
+        valor = dados.valor,
+        concluida = dados.concluida
+    };
+
+    db.Oficina.Add(oficina);
+    await db.SaveChangesAsync();
+
+    return Results.Created($"/api/ordens/{oficina.Id}", oficina);
+});
+
+app.MapGet("/api/ordens", async (ApiDbContext db) =>
+{
+    var ordens = await db.Oficina.ToListAsync();
     return Results.Ok(ordens);
 });
 
-app.MapGet("/api/ordens/{id:int}", (int id) =>
+app.MapGet("/api/ordens/{id:int}", async (int id, ApiDbContext db) =>
 {
-    var ordemEncontrada = ordens.Find(ordem => ordem.Id == id);
+    var ordemEncontrada = await db.Oficina.FindAsync(id);
 
     if (ordemEncontrada is null)
     {
@@ -26,61 +49,69 @@ app.MapGet("/api/ordens/{id:int}", (int id) =>
     return Results.Ok(ordemEncontrada);
 });
 
-app.MapPost("/api/ordens", (OrdemServicoEntradaDTO dados) =>
+app.MapPut("/api/ordens/{id:int}", async (int id, OrdemServicoEntradaDTO dados, ApiDbContext db) =>
 {
-    int proximoId = ordens.Count + 1;
+    var ordemEncontrada = await db.Oficina.FindAsync(id);
 
-    var novaOrdem = new OrdemServico(
-        proximoId, dados.cliente, dados.veiculo, dados.servico, dados.valor, false
-    );
-
-    ordens.Add(novaOrdem);
-
-    return Results.Created($"/api/ordens/{novaOrdem.Id}", novaOrdem);
-});
-
-app.MapPut("/api/ordens/{id:int}", (int id, OrdemServicoEntradaDTO dados) =>
-{
-    int indice = ordens.FindIndex(ordemDaLista => ordemDaLista.Id == id);
-
-    if (indice == -1)
+    if (ordemEncontrada is null)
     {
         return Results.NotFound();
     }
 
-    var atualizado = new OrdemServico(
-        id, dados.cliente, dados.veiculo, dados.servico, dados.valor, dados.concluida
-    );
+    ordemEncontrada.cliente = dados.cliente;
+    ordemEncontrada.veiculo = dados.veiculo;
+    ordemEncontrada.servico = dados.servico;
+    ordemEncontrada.valor = dados.valor;
+    ordemEncontrada.concluida = dados.concluida;
 
-    ordens[indice] = atualizado;
+    await db.SaveChangesAsync();
 
-    return Results.Ok(atualizado);
+    return Results.Ok(ordemEncontrada);
 });
 
-app.MapDelete("/api/ordens/{id:int}", (int id) =>
+app.MapDelete("/api/ordens/{id:int}", async (int id, ApiDbContext db) =>
 {
-    int indice = ordens.FindIndex(ordemDaLista => ordemDaLista.Id == id);
+    var ordemEncontrada = await db.Oficina.FindAsync(id);
 
-    if (indice == -1)
+    if (ordemEncontrada is null)
     {
         return Results.NotFound();
     }
 
-    ordens.RemoveAt(indice);
+    db.Oficina.Remove(ordemEncontrada);
+    await db.SaveChangesAsync();
 
     return Results.NoContent();
 });
 
 app.Run();
 
-record OrdemServico(
-    int Id, string cliente, string veiculo, string servico, double valor, bool concluida
-);
+// MODEL
+class OficinaEntity
+{
+    public int Id { get; set; }
+    public string cliente { get; set; } = string.Empty;
+    public string veiculo { get; set; } = string.Empty;
+    public string servico { get; set; } = string.Empty;
+    public double valor { get; set; }
+    public bool concluida { get; set; }
+}
 
-record OrdemServicoDTO(
-    int Id, string cliente, string veiculo, string servico, double valor, bool concluida
-);
+// DBCONTEXT
+class ApiDbContext : DbContext
+{
+    public ApiDbContext(DbContextOptions<ApiDbContext> options) : base(options)
+    {
+    }
 
+    public DbSet<OficinaEntity> Oficina => Set<OficinaEntity>();
+}
+
+// DTO DE ENTRADA
 record OrdemServicoEntradaDTO(
-    string cliente, string veiculo, string servico, double valor, bool concluida
+    string cliente,
+    string veiculo,
+    string servico,
+    double valor,
+    bool concluida
 );

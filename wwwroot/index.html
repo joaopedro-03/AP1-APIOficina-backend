@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oficina Mecânica - Gestão de Ordens de Serviço</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Cabeçalho Principal -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <span class="brand-icon" aria-hidden="true">&#9881;</span>
+        <div>
+          <h1>Auto Mecânica Precision</h1>
+          <p class="brand-subtitle">Gestão de Ordens de Serviço</p>
+        </div>
+      </div>
+      <div class="api-status" id="api-status-container">
+        <span class="status-indicator status-online" aria-hidden="true"></span>
+        <span id="api-status-text">Conectado à API</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <!-- Seção de Indicadores / Resumo Rápido -->
+    <section class="metrics-grid" aria-label="Resumo das ordens de serviço">
+      <article class="metric-card">
+        <h2 class="metric-title">Total de Ordens</h2>
+        <p class="metric-value" id="metric-total">0</p>
+        <span class="metric-desc">Cadastradas no sistema</span>
+      </article>
+
+      <article class="metric-card metric-warning">
+        <h2 class="metric-title">Em Andamento</h2>
+        <p class="metric-value" id="metric-pendentes">0</p>
+        <span class="metric-desc">Serviços pendentes</span>
+      </article>
+
+      <article class="metric-card metric-success">
+        <h2 class="metric-title">Concluídas</h2>
+        <p class="metric-value" id="metric-concluidas">0</p>
+        <span class="metric-desc">Serviços finalizados</span>
+      </article>
+
+      <article class="metric-card metric-info">
+        <h2 class="metric-title">Valor Total</h2>
+        <p class="metric-value" id="metric-valor-total">R$ 0,00</p>
+        <span class="metric-desc">Soma acumulada das OS</span>
+      </article>
+    </section>
+
+    <!-- Layout em Duas Colunas: Formulário e Lista -->
+    <div class="content-grid">
+      <!-- Coluna do Formulário -->
+      <section class="card form-section" aria-labelledby="form-heading">
+        <div class="card-header">
+          <h2 id="form-heading">Nova Ordem de Serviço</h2>
+          <span id="form-mode-badge" class="badge badge-new">Novo Cadastro</span>
+        </div>
+
+        <!-- Área de Alertas e Feedback -->
+        <div id="form-feedback" class="feedback-message" role="status" aria-live="polite"></div>
+
+        <form id="form-ordem" novalidate>
+          <input type="hidden" id="ordem-id" value="">
+
+          <div class="form-group">
+            <label for="cliente">
+              Nome do Cliente <span class="required" aria-hidden="true">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="cliente" 
+              name="cliente" 
+              placeholder="Ex.: Maria Victoria" 
+              required
+              aria-describedby="cliente-help"
+            >
+            <small id="cliente-help" class="form-help">Informe o nome completo do cliente.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="veiculo">
+              Veículo (Marca e Modelo) <span class="required" aria-hidden="true">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="veiculo" 
+              name="veiculo" 
+              placeholder="Ex.: Fiat Strada" 
+              required
+              aria-describedby="veiculo-help"
+            >
+            <small id="veiculo-help" class="form-help">Informe a identificação do veículo.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="servico">
+              Descrição do Serviço <span class="required" aria-hidden="true">*</span>
+            </label>
+            <textarea 
+              id="servico" 
+              name="servico" 
+              rows="3" 
+              placeholder="Ex.: Troca de bateria" 
+              required
+              aria-describedby="servico-help"
+            ></textarea>
+            <small id="servico-help" class="form-help">Descreva o serviço a ser realizado.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="valor">
+              Valor do Serviço (R$) <span class="required" aria-hidden="true">*</span>
+            </label>
+            <input 
+              type="number" 
+              id="valor" 
+              name="valor" 
+              placeholder="Ex.: 450.00" 
+              step="0.01" 
+              min="0" 
+              required
+              aria-describedby="valor-help"
+            >
+            <small id="valor-help" class="form-help">Valor em reais (ex.: 450.00).</small>
+          </div>
+
+          <div class="form-group">
+            <label for="concluida">
+              Situação da Ordem de Serviço
+            </label>
+            <select id="concluida" name="concluida">
+              <option value="false">Pendente (Em andamento)</option>
+              <option value="true">Concluída (Finalizado)</option>
+            </select>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" id="btn-submit" class="btn btn-primary">
+              Cadastrar Ordem
+            </button>
+            <button type="button" id="btn-cancelar" class="btn btn-secondary" style="display: none;">
+              Cancelar Edição
+            </button>
+            <button type="button" id="btn-limpar" class="btn btn-outline">
+              Limpar
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Coluna da Tabela / Lista -->
+      <section class="card list-section" aria-labelledby="list-heading">
+        <div class="card-header list-header">
+          <div>
+            <h2 id="list-heading">Ordens Registradas</h2>
+            <p class="section-subtitle">Dados sincronizados diretamente com a API</p>
+          </div>
+          <button type="button" id="btn-recarregar" class="btn btn-sm btn-outline" title="Recarregar dados da API">
+            Atualizar Lista
+          </button>
+        </div>
+
+        <!-- Filtros e Busca Rápida -->
+        <div class="filter-bar" role="search" aria-label="Filtros de ordens">
+          <div class="search-input-wrapper">
+            <label for="filtro-busca" class="visually-hidden">Buscar ordens</label>
+            <input 
+              type="search" 
+              id="filtro-busca" 
+              placeholder="Buscar por cliente, veículo ou serviço..." 
+              autocomplete="off"
+            >
+          </div>
+
+          <div class="status-select-wrapper">
+            <label for="filtro-status" class="visually-hidden">Filtrar por situação</label>
+            <select id="filtro-status">
+              <option value="todos">Todos os status</option>
+              <option value="pendente">Somente Pendentes</option>
+              <option value="concluida">Somente Concluídas</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Estado de Carregamento -->
+        <div id="loading-state" class="loading-state" style="display: none;" role="status">
+          <div class="spinner" aria-hidden="true"></div>
+          <p>Carregando ordens de serviço da API...</p>
+        </div>
+
+        <!-- Estado de Erro de Conexão -->
+        <div id="error-state" class="error-state" style="display: none;" role="alert">
+          <p id="error-state-message" class="error-message-text"></p>
+          <button type="button" id="btn-tentar-novamente" class="btn btn-sm btn-outline">
+            Tentar Novamente
+          </button>
+        </div>
+
+        <!-- Tabela Responsiva de Ordens de Serviço -->
+        <div class="table-container" id="table-container" tabindex="0" aria-label="Tabela de ordens de serviço">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th scope="col" class="col-id">#ID</th>
+                <th scope="col">Cliente</th>
+                <th scope="col">Veículo</th>
+                <th scope="col">Serviço</th>
+                <th scope="col" class="col-valor">Valor</th>
+                <th scope="col" class="col-status">Situação</th>
+                <th scope="col" class="col-acoes">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-ordens-corpo">
+              <!-- Linhas geradas de forma segura e preenchidas via textContent no app.js -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Estado Vazio (quando não há ordens cadastradas na API ou no filtro) -->
+        <div id="empty-state" class="empty-state" style="display: none;">
+          <p class="empty-title" id="empty-state-title">Nenhuma ordem de serviço encontrada.</p>
+          <p class="empty-desc" id="empty-state-desc">Cadastre uma nova ordem utilizando o formulário ao lado.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Diálogo Modal: Visualizar Detalhes da Ordem -->
+  <dialog id="modal-visualizar" class="app-dialog" aria-labelledby="modal-detalhes-title">
+    <div class="dialog-content">
+      <div class="dialog-header">
+        <h3 id="modal-detalhes-title">Detalhes da Ordem de Serviço</h3>
+        <button type="button" class="btn-close" id="btn-fechar-detalhes" aria-label="Fechar janela">&times;</button>
+      </div>
+      <div class="dialog-body" id="detalhes-conteudo">
+        <!-- Preenchido via textContent no app.js -->
+      </div>
+      <div class="dialog-footer">
+        <button type="button" class="btn btn-secondary" id="btn-fechar-modal-detalhes">Fechar</button>
+        <button type="button" class="btn btn-primary" id="btn-editar-dos-detalhes">Editar esta Ordem</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Diálogo Modal: Confirmação de Exclusão -->
+  <dialog id="modal-excluir" class="app-dialog" aria-labelledby="modal-excluir-title">
+    <div class="dialog-content">
+      <div class="dialog-header dialog-header-danger">
+        <h3 id="modal-excluir-title">Confirmar Exclusão</h3>
+        <button type="button" class="btn-close" id="btn-cancelar-excluir-x" aria-label="Fechar janela">&times;</button>
+      </div>
+      <div class="dialog-body">
+        <p>Tem certeza de que deseja excluir a ordem de serviço <strong id="excluir-ordem-id">#</strong> permanentemente?</p>
+        <p class="text-muted"><small>Esta ação solicitará a remoção definitiva do registro na API (DELETE /api/ordens/{id}).</small></p>
+      </div>
+      <div class="dialog-footer">
+        <button type="button" class="btn btn-secondary" id="btn-cancelar-excluir">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="btn-confirmar-excluir">Sim, Excluir</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Rodapé -->
+  <footer class="app-footer">
+    <p>Auto Mecânica Precision &bull; Sistema de Gestão de Ordens de Serviço</p>
+    <p class="footer-note">Integrado via Minimal API ASP.NET Core &bull; Endpoints validados na coleção Bruno</p>
+  </footer>
+
+<script src="/app.js?v=3"></script>
+</body>
+</html>
