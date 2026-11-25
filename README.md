@@ -1,14 +1,12 @@
-# API de Oficina Mecânica — AP2
+# ApiOficina AS – API de Gerenciamento de Ordens de Serviço
 
-## Descrição do projeto
+## Sobre o projeto
 
-Este projeto foi desenvolvido para a disciplina de Backend, utilizando C# e ASP.NET Core com .NET 10.
+O ApiOficina é um projeto desenvolvido em C# utilizando ASP.NET Core Minimal API, com o objetivo de gerenciar ordens de serviço de uma oficina mecânica.
 
-O objetivo é criar uma API para gerenciar ordens de serviço de uma oficina mecânica, permitindo cadastrar, listar, buscar, atualizar e excluir registros.
+O projeto foi desenvolvido como atividade acadêmica, com a evolução de uma API inicialmente simples para uma aplicação com persistência de dados utilizando Entity Framework Core e SQLite.
 
-Na AP1, os dados eram armazenados em uma lista na memória. Na AP2, o projeto foi atualizado para utilizar **Entity Framework Core e SQLite**, permitindo que os registros continuem armazenados mesmo após reiniciar a aplicação.
-
-Também foi integrado um frontend desenvolvido com HTML, CSS e JavaScript, permitindo realizar as operações diretamente pelo navegador.
+A aplicação também possui uma interface frontend integrada, permitindo a interação com as funcionalidades da API.
 
 ## Tecnologias utilizadas
 
@@ -17,83 +15,100 @@ Também foi integrado um frontend desenvolvido com HTML, CSS e JavaScript, permi
 - ASP.NET Core Minimal API
 - Entity Framework Core
 - SQLite
-- HTML, CSS e JavaScript
-- Bruno (testes da API)
-- Git e GitHub
-
-## Funcionalidades
-
-- Cadastrar uma nova ordem de serviço.
-- Listar todas as ordens cadastradas.
-- Buscar uma ordem pelo ID.
-- Atualizar os dados de uma ordem.
-- Alterar a situação entre Pendente e Concluída.
-- Excluir uma ordem de serviço.
-- Armazenar os dados no banco SQLite.
-- Gerenciar ordens pelo frontend integrado.
+- HTML5
+- CSS3
+- JavaScript
+- Bruno (testes de API)
+- Visual Studio Code
 
 ## Estrutura do projeto
 
 ```text
 ApiOficina/
+│
+├── Data/
+│   └── ApiDbContext.cs
+│
+├── Dtos/
+│
+├── Migrations/
+│
+├── Models/
+│   └── OficinaEntity.cs
+│
+├── wwwroot/
+│   ├── index.html
+│   ├── style.css
+│   └── app.js
+│
+├── bruno/
+│   └── Collection de requisições
+│
 ├── Program.cs
 ├── ApiOficina.csproj
 ├── appsettings.json
-├── appsettings.Development.json
-├── Migrations/
-├── wwwroot/
-│   ├── index.html
-│   ├── app.js
-│   └── style.css
-├── bruno/
 ├── .gitignore
 └── README.md
 ```
 
-A pasta `wwwroot` contém a interface do sistema, enquanto o `Program.cs` contém os endpoints da API, o Model e o DbContext.
+## Organização do projeto
 
-A pasta `Migrations` contém os arquivos utilizados para criar e atualizar a estrutura do banco SQLite.
+- **Models:** contém as entidades que representam os dados utilizados pela aplicação.
+- **Dtos:** contém os objetos de transferência de dados utilizados nas requisições.
+- **Data:** contém o contexto do Entity Framework Core, responsável pela comunicação com o banco de dados.
+- **Migrations:** armazena as migrações utilizadas para controlar a estrutura do banco de dados.
+- **wwwroot:** contém os arquivos do frontend (HTML, CSS e JavaScript).
+- **bruno:** contém a Collection com as requisições utilizadas para testar a API.
+- **Program.cs:** responsável pela configuração, inicialização, middlewares e definição dos endpoints da aplicação.
 
-A Collection do Bruno contém as requisições utilizadas nos testes do CRUD.
+## Banco de dados
+
+O projeto utiliza SQLite como banco de dados, integrado ao Entity Framework Core.
+
+A conexão é configurada através da propriedade `DefaultConnection`, localizada no arquivo `appsettings.json`.
+
+O arquivo `ApiDbContext.cs` é responsável por representar o contexto do banco de dados e permitir as operações de consulta, inclusão, atualização e exclusão de registros.
+
+As migrations são utilizadas para controlar as alterações na estrutura do banco de dados.
+
+Os dados são armazenados de forma persistente, permanecendo disponíveis mesmo após o encerramento e a reinicialização da aplicação.
+
+## Funcionalidades
+
+- Cadastro de registros.
+- Listagem de registros.
+- Consulta de registros por identificador.
+- Atualização de informações.
+- Exclusão de registros.
+- Tratamento de erros e respostas HTTP.
+- Interface frontend integrada à API.
+- Persistência de dados utilizando SQLite.
 
 ## Como executar o projeto
 
-### Requisitos
+### Pré-requisitos
 
 - .NET 10 SDK instalado.
 - Visual Studio Code ou outra IDE compatível.
-- Ferramenta `dotnet-ef` versão 10.
-- Bruno para testar os endpoints.
+- Git (opcional).
 
 ### 1. Clonar o repositório
 
-Clone este repositório pelo Git ou faça o download dos arquivos e abra a pasta `ApiOficina` no VS Code.
+```bash
+git clone URL_DO_REPOSITORIO
+```
 
-### 2. Restaurar as dependências
+### 2. Entrar na pasta do projeto
 
-No terminal, execute:
+```bash
+cd ApiOficina
+```
+
+### 3. Restaurar as dependências
 
 ```bash
 dotnet restore
 ```
-
-### 3. Preparar o banco de dados
-
-Se a ferramenta `dotnet-ef` ainda não estiver instalada, execute:
-
-```bash
-dotnet tool install --global dotnet-ef --version "10.0.*"
-```
-
-Depois, execute:
-
-```bash
-dotnet ef database update
-```
-
-Esse comando aplica as migrations e prepara o banco SQLite para utilização.
-
-Não é necessário enviar o arquivo local do banco ao GitHub, pois ele pode ser preparado utilizando as migrations.
 
 ### 4. Compilar o projeto
 
@@ -101,138 +116,72 @@ Não é necessário enviar o arquivo local do banco ao GitHub, pois ele pode ser
 dotnet build
 ```
 
-O projeto deve compilar sem erros.
-
-### 5. Executar a API
+### 5. Executar a aplicação
 
 ```bash
-dotnet run --urls http://localhost:5050
+dotnet run
 ```
 
-A aplicação será iniciada no endereço:
+Após a inicialização, a aplicação estará disponível no endereço informado pelo terminal.
 
-http://localhost:5050
+## Testes da API
 
-## Rotas da API
+Os testes das operações da API são realizados utilizando o Bruno.
 
-| Método | Endpoint | Descrição | Status |
-|---|---|---|---|
-| GET | /api/ordens | Lista todas as ordens | 200 |
-| GET | /api/ordens/{id} | Busca uma ordem pelo ID | 200 ou 404 |
-| POST | /api/ordens | Cadastra uma ordem | 201 |
-| PUT | /api/ordens/{id} | Atualiza uma ordem | 200 ou 404 |
-| DELETE | /api/ordens/{id} | Exclui uma ordem | 204 ou 404 |
+O projeto possui uma Collection salva na pasta `bruno/`, contendo as requisições utilizadas para validar o funcionamento dos endpoints.
 
-## Exemplo de JSON
+São testadas as seguintes operações:
 
-Para cadastrar uma ordem de serviço pelo Bruno, utilize o método POST com a seguinte URL:
-
-http://localhost:5050/api/ordens
-
-No Body, selecione JSON e informe:
-
-```json
-{
-  "cliente": "João Pedro",
-  "veiculo": "Corsa Classic",
-  "servico": "Troca de óleo",
-  "valor": 150.00,
-  "concluida": false
-}
-```
-
-Ao cadastrar uma ordem, a API retorna o código HTTP `201 Created` e o objeto cadastrado com seu ID.
-
-O ID é gerado pelo banco de dados.
-
-## Model e DbContext
-
-A classe `OficinaEntity` representa uma ordem de serviço e possui os seguintes campos:
-
-- `Id`: identificador da ordem.
-- `cliente`: nome do cliente.
-- `veiculo`: veículo do cliente.
-- `servico`: descrição do serviço.
-- `valor`: valor cobrado pelo serviço.
-- `concluida`: indica se a ordem está concluída ou pendente.
-
-A classe `ApiDbContext` é responsável pela comunicação com o banco SQLite através do Entity Framework Core.
-
-As operações de cadastro, atualização e exclusão utilizam o método `SaveChangesAsync()` para gravar as alterações no banco de dados.
-
-## Frontend integrado
-
-O frontend foi desenvolvido com HTML, CSS e JavaScript e está localizado na pasta `wwwroot`.
-
-Para acessar a interface, execute a aplicação e abra:
-
-http://localhost:5050
-
-A interface permite:
-
-- Visualizar as ordens cadastradas.
-- Cadastrar novas ordens.
-- Consultar os detalhes de uma ordem.
-- Editar informações.
-- Alterar a situação da ordem.
-- Excluir registros.
-- Pesquisar e filtrar ordens por situação.
-- Visualizar indicadores das ordens cadastradas.
-
-O JavaScript utiliza `fetch()` para enviar requisições aos endpoints reais da API.
-
-Os dados exibidos são consultados no banco SQLite através do backend, sem depender de uma lista fictícia no navegador.
-
-## Testes realizados no Bruno
-
-As operações da API foram testadas utilizando o Bruno.
-
-A Collection contém requisições para:
-
-1. POST — Cadastrar ordem de serviço.
-2. GET — Listar ordens.
-3. GET por ID — Consultar uma ordem.
-4. PUT — Atualizar uma ordem.
-5. DELETE — Excluir uma ordem.
-6. GET após exclusão — Confirmar resposta 404.
-
-Também foi realizado o teste de persistência, reiniciando a aplicação e verificando que os registros não excluídos continuam disponíveis.
+| Método HTTP | Operação | Resultado esperado |
+|---|---|---|
+| GET | Listar registros | 200 OK |
+| POST | Cadastrar registro | 201 Created |
+| GET | Consultar por ID | 200 OK |
+| PUT | Atualizar registro | 200 OK |
+| DELETE | Excluir registro | 204 No Content |
+| GET | Consultar registro inexistente | 404 Not Found |
 
 ## Persistência dos dados
 
-Os registros são armazenados no SQLite utilizando Entity Framework Core.
+Um dos pontos importantes da evolução do projeto foi a implementação da persistência utilizando SQLite e Entity Framework Core.
 
-Diferentemente da AP1, em que os dados eram mantidos em memória, agora as ordens permanecem salvas mesmo após encerrar e reiniciar a API.
+Para validar essa funcionalidade, é realizado o seguinte procedimento:
 
-O banco local não é enviado ao repositório. Sua estrutura é recriada utilizando o comando:
+1. Cadastrar um novo registro utilizando o Bruno.
+2. Consultar o registro para verificar se foi armazenado.
+3. Encerrar a aplicação.
+4. Iniciar novamente a API.
+5. Consultar o mesmo registro utilizando seu identificador.
 
-```bash
-dotnet ef database update
-```
+Dessa forma, é possível verificar que os dados permanecem armazenados mesmo após a reinicialização da aplicação.
 
-## Vídeo de demonstração — AP2
+## Tratamento de erros
 
-**Link do vídeo:** https://drive.google.com/file/d/1y3ATvwn4Un0b1i6tQAoBgF64Vfw8d4qp/view?usp=sharing
+O projeto possui um middleware de tratamento de exceções configurado no `Program.cs`.
 
-O vídeo demonstra:
+Esse mecanismo permite capturar erros internos durante a execução da aplicação e retornar uma resposta padronizada em formato JSON, utilizando o código HTTP 500.
 
-- Apresentação do projeto e sua estrutura.
-- Inicialização da API.
-- Explicação do Model, DbContext e SQLite.
-- Testes das operações CRUD no Bruno.
-- Respostas HTTP 201, 200, 204 e 404.
-- Integração do frontend com a API real.
-- Cadastro, listagem, edição e exclusão pelo navegador.
-- Persistência de dados após reiniciar a aplicação.
+Também existe uma rota de teste de erro para verificar o funcionamento desse mecanismo.
 
-O vídeo está disponível por link público, sem necessidade de solicitar autorização.
+## Frontend
 
-## Considerações finais
+A aplicação possui uma interface frontend integrada ao backend, desenvolvida utilizando:
 
-A AP2 representa uma evolução da API desenvolvida na AP1.
+- HTML para a estrutura das páginas.
+- CSS para a estilização.
+- JavaScript para a comunicação com a API.
 
-A principal melhoria foi a implementação da persistência de dados com Entity Framework Core e SQLite.
+Os arquivos estão organizados dentro da pasta `wwwroot`.
 
-Além disso, o frontend foi integrado aos endpoints reais, permitindo realizar o gerenciamento das ordens de serviço diretamente pela interface.
+## Vídeo de demonstração — AS
 
-O projeto demonstra a comunicação entre frontend, backend e banco de dados em uma aplicação ASP.NET Core.AquIQVjLhmBHCULz0n4qXvwedOuBVIh/view?usp=sharing
+**Link do vídeo:** https://drive.google.com/file/d/1YqqGoAV7dieIpqz_g0qpxSR5TxLVyY4S/view?usp=sharing
+
+## Autor
+
+João Pedro Matos da Rosa
+
+**Projeto:** ApiOficina  
+**Linguagem:** C#  
+**Framework:** ASP.NET Core Minimal API  
+**Banco de dados:** SQLite

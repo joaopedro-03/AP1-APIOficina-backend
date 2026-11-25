@@ -1,5 +1,8 @@
 
 using Microsoft.EntityFrameworkCore;
+using ApiOficina.Models;
+using ApiOficina.Dtos;
+using ApiOficina.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,10 +12,29 @@ builder.Services.AddDbContext<ApiDbContext>(options =>
 
 var app = builder.Build();
 
+app.UseExceptionHandler(errorApp =>
+{   
+   errorApp.Run(async context =>
+   {
+      context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+      context.Response.ContentType = "application/json";
+      await context.Response.WriteAsJsonAsync(new
+      {
+         mensagem = "Ocorreu um erro interno. Tente novamente mais tarde." 
+      }); 
+   }); 
+});
+
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
 app.MapGet("/api", () => "API da Oficina está no ar!");
+
+app.MapGet("/api/teste-erro", () =>
+{
+    throw new InvalidOperationException ("falha simulada para teste.");
+}
+);
 
 app.MapPost("/api/ordens", async (OrdemServicoEntradaDTO dados, ApiDbContext db) =>
 {
@@ -86,32 +108,5 @@ app.MapDelete("/api/ordens/{id:int}", async (int id, ApiDbContext db) =>
 
 app.Run();
 
-// MODEL
-class OficinaEntity
-{
-    public int Id { get; set; }
-    public string cliente { get; set; } = string.Empty;
-    public string veiculo { get; set; } = string.Empty;
-    public string servico { get; set; } = string.Empty;
-    public double valor { get; set; }
-    public bool concluida { get; set; }
-}
 
-// DBCONTEXT
-class ApiDbContext : DbContext
-{
-    public ApiDbContext(DbContextOptions<ApiDbContext> options) : base(options)
-    {
-    }
 
-    public DbSet<OficinaEntity> Oficina => Set<OficinaEntity>();
-}
-
-// DTO DE ENTRADA
-record OrdemServicoEntradaDTO(
-    string cliente,
-    string veiculo,
-    string servico,
-    double valor,
-    bool concluida
-);
